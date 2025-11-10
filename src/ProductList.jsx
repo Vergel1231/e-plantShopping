@@ -1,14 +1,24 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import './ProductList.css';
 import CartItem from './CartItem';
-import { useDispatch } from 'react-redux';
-import { addItem } from './CartSlice'; // ✅ Import Redux action
+import { useDispatch, useSelector } from 'react-redux';
+import { addItem } from './CartSlice'; // Import Redux action
 
 function ProductList({ onHomeClick }) {
   const [showCart, setShowCart] = useState(false);
   const [showPlants, setShowPlants] = useState(false);
-  const [addedToCart, setAddedToCart] = useState({}); // ✅ Track added products
+  const [addedToCart, setAddedToCart] = useState({});
   const dispatch = useDispatch();
+
+  // Access Redux store to get all cart items
+  const CartItems = useSelector((state) => state.cart.items);
+
+  // Function to calculate total quantity of items in the cart
+  const calculateTotalQuantity = () => {
+    return CartItems && CartItems.length > 0
+      ? CartItems.reduce((total, item) => total + item.quantity, 0)
+      : 0;
+  };
 
   const plantsArray = [
     {
@@ -69,7 +79,6 @@ function ProductList({ onHomeClick }) {
         }
       ]
     }
-    // ... you can keep the rest of your categories here
   ];
 
   const styleObj = {
@@ -116,19 +125,18 @@ function ProductList({ onHomeClick }) {
     setShowCart(false);
   };
 
-  // ✅ Add to Cart Function
+  // Add to Cart Function
   const handleAddToCart = (product) => {
-    dispatch(addItem(product)); // Send product to Redux store
-
+    dispatch(addItem(product));
     setAddedToCart((prevState) => ({
       ...prevState,
-      [product.name]: true, // Mark as added
+      [product.name]: true,
     }));
   };
 
   return (
     <div>
-      {/* ✅ Navbar Section */}
+      {/* Navbar Section */}
       <div className="navbar" style={styleObj}>
         <div className="tag">
           <div className="luxury">
@@ -143,17 +151,28 @@ function ProductList({ onHomeClick }) {
         </div>
         <div style={styleObjUl}>
           <div><a href="#" onClick={(e) => handlePlantsClick(e)} style={styleA}>Plants</a></div>
-          <div><a href="#" onClick={(e) => handleCartClick(e)} style={styleA}><h1 className='cart'>
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" height="68" width="68">
-              <circle cx="80" cy="216" r="12"></circle>
-              <circle cx="184" cy="216" r="12"></circle>
-              <path d="M42.3,72H221.7l-26.4,92.4A15.9,15.9,0,0,1,179.9,176H84.1a15.9,15.9,0,0,1-15.4-11.6L32.5,37.8A8,8,0,0,0,24.8,32H8"
-                fill="none" stroke="#faf9f9" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"></path>
-            </svg></h1></a></div>
+
+          {/* Cart icon showing total quantity */}
+          <div>
+            <a href="#" onClick={(e) => handleCartClick(e)} style={styleA}>
+              <h1 className='cart'>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" height="68" width="68">
+                  <circle cx="80" cy="216" r="12"></circle>
+                  <circle cx="184" cy="216" r="12"></circle>
+                  <path d="M42.3,72H221.7l-26.4,92.4A15.9,15.9,0,0,1,179.9,176H84.1a15.9,15.9,0,0,1-15.4-11.6L32.5,37.8A8,8,0,0,0,24.8,32H8"
+                    fill="none" stroke="#faf9f9" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"></path>
+                </svg>
+              </h1>
+              {/* Total quantity displayed beside the cart */}
+              <span style={{ color: 'white', fontSize: '22px', marginLeft: '10px' }}>
+                {calculateTotalQuantity()}
+              </span>
+            </a>
+          </div>
         </div>
       </div>
 
-      {/* ✅ Product Grid Section */}
+      {/* Product Grid Section */}
       {!showCart ? (
         <div className="product-grid">
           {plantsArray.map((category, index) => (
